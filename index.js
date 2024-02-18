@@ -1,4 +1,4 @@
-// lambda_function.js
+// index.js
 const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const tableName = process.env.CONNECTIONS_TABLE;
