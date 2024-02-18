@@ -1,0 +1,19 @@
+{
+  "name": "poker-connect",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lambda_function.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Harold-coder/pure-poker-pokerpage-connect.git"
+  },
+  "author": "Harold Castiaux",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Harold-coder/pure-poker-pokerpage-connect/issues"
+  },
+  "homepage": "https://github.com/Harold-coder/pure-poker-pokerpage-connect#readme"
+}
