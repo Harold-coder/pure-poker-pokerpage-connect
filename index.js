@@ -4,10 +4,10 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const tableName = process.env.CONNECTIONS_TABLE;
 
 exports.handler = async (event) => {
-  const connectionId = event.requestContext.connectionId;
+  const gameID = event.requestContext.gameID;
 
   const item = {
-    connectionId: connectionId,
+    gameID: gameID,
     // Additional attributes can be added here based on your game logic
   };
 
