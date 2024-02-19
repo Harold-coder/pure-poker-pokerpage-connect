@@ -1,21 +1,29 @@
-// index.js
 const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
-const tableName = process.env.CONNECTIONS_TABLE;
+const connectionsTable = process.env.CONNECTIONS_TABLE;
 
 exports.handler = async (event) => {
-  const gameID = event.requestContext.gameID;
+    // Extract the connection ID provided by API Gateway
+    const connectionId = event.requestContext.connectionId;
 
-  const item = {
-    gameID: gameID,
-    // Additional attributes can be added here based on your game logic
-  };
+    // Extract the playerId and gameId from the query string parameters
+    const queryStringParameters = event.queryStringParameters || {};
+    const playerId = queryStringParameters.playerId;
+    const gameId = queryStringParameters.gameId; // gameId may be undefined if creating a new game
 
-  try {
-    await dynamoDb.put({ TableName: tableName, Item: item }).promise();
-    return { statusCode: 200, body: 'Connected.' };
-  } catch (err) {
-    console.error('Error saving connection:', err);
-    return { statusCode: 500, body: 'Failed to connect' };
-  }
+    // Prepare the item to insert into the DynamoDB table
+    const item = {
+        connectionId,
+        playerId,
+        gameId, // This can be undefined, which is okay for new game creation scenarios
+    };
+
+    try {
+        // Insert the item into the DynamoDB table
+        await dynamoDb.put({ TableName: connectionsTable, Item: item }).promise();
+        return { statusCode: 200, body: 'Connected.' };
+    } catch (err) {
+        console.error('Error saving connection:', err);
+        return { statusCode: 500, body: 'Failed to connect' };
+    }
 };
