@@ -4,33 +4,40 @@ const connectionsTableName = process.env.CONNECTIONS_TABLE;
 const gameSessionsTableName = process.env.GAME_TABLE; // Make sure to set this in your environment variables
 
 exports.handler = async (event) => {
-  const connectionId = event.requestContext.connectionId;
-  const gameId = event.requestContext.gameId;
-  const playerUsername = event.requestContext.playerUsername;
+    const connectionId = event.requestContext.connectionId;
 
-  // First, check if the gameId exists in the gameSessions table
-  try {
-    const gameSessionResponse = await dynamoDb.get({
-      TableName: gameSessionsTableName,
-      Key: { gameId: gameId },
-    }).promise();
+    // Retrieve gameId and playerUsername from queryStringParameters
+    const gameId = event.queryStringParameters ? event.queryStringParameters.gameId : null;
+    const playerUsername = event.queryStringParameters ? event.queryStringParameters.playerUsername : null;
 
-    // If the game session doesn't exist, return an error response
-    if (!gameSessionResponse.Item) {
-      return { statusCode: 404, body: JSON.stringify({ message: "Game session not found." }) };
+    // Check if gameId and playerUsername are provided
+    if (!gameId || !playerUsername) {
+        return { statusCode: 400, body: JSON.stringify({ message: "Missing gameId or playerUsername." }) };
     }
 
-    // If the game session exists, proceed to save the connection
-    const item = {
-      connectionId: connectionId,
-      gameId: gameId,
-      playerUsername: playerUsername, // You had playerUsername twice here
-    };
+    // First, check if the gameId exists in the gameSessions table
+    try {
+        const gameSessionResponse = await dynamoDb.get({
+            TableName: gameSessionsTableName,
+            Key: { gameId: gameId },
+        }).promise();
 
-    await dynamoDb.put({ TableName: connectionsTableName, Item: item }).promise();
-    return { statusCode: 200, body: JSON.stringify({ message: 'Connected.' }) };
-  } catch (err) {
-    console.error('Error:', err);
-    return { statusCode: 500, body: JSON.stringify({ message: 'Failed to connect' }) };
-  }
+        // If the game session doesn't exist, return an error response
+        if (!gameSessionResponse.Item) {
+            return { statusCode: 404, body: JSON.stringify({ message: "Game session not found." }) };
+        }
+
+        // If the game session exists, proceed to save the connection
+        const item = {
+            connectionId: connectionId,
+            gameId: gameId,
+            playerUsername: playerUsername,
+        };
+
+        await dynamoDb.put({ TableName: connectionsTableName, Item: item }).promise();
+        return { statusCode: 200, body: JSON.stringify({ message: 'Connected.' }) };
+    } catch (err) {
+        console.error('Error:', err);
+        return { statusCode: 500, body: JSON.stringify({ message: 'Failed to connect' }) };
+    }
 };
