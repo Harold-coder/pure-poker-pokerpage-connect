@@ -1,29 +1,36 @@
 const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
-const connectionsTable = process.env.CONNECTIONS_TABLE;
+const connectionsTableName = process.env.CONNECTIONS_TABLE;
+const gameSessionsTableName = process.env.GAME_TABLE; // Make sure to set this in your environment variables
 
 exports.handler = async (event) => {
-    // Extract the connection ID provided by API Gateway
-    const connectionId = event.requestContext.connectionId;
+  const connectionId = event.requestContext.connectionId;
+  const gameId = event.requestContext.gameId;
+  const playerUsername = event.requestContext.playerUsername;
 
-    // Extract the playerId and gameId from the query string parameters
-    const queryStringParameters = event.queryStringParameters || {};
-    const playerId = queryStringParameters.playerId;
-    const gameId = queryStringParameters.gameId; // gameId may be undefined if creating a new game
+  // First, check if the gameId exists in the gameSessions table
+  try {
+    const gameSessionResponse = await dynamoDb.get({
+      TableName: gameSessionsTableName,
+      Key: { gameId: gameId },
+    }).promise();
 
-    // Prepare the item to insert into the DynamoDB table
+    // If the game session doesn't exist, return an error response
+    if (!gameSessionResponse.Item) {
+      return { statusCode: 404, body: JSON.stringify({ message: "Game session not found." }) };
+    }
+
+    // If the game session exists, proceed to save the connection
     const item = {
-        connectionId,
-        playerId,
-        gameId, // This can be undefined, which is okay for new game creation scenarios
+      connectionId: connectionId,
+      gameId: gameId,
+      playerUsername: playerUsername, // You had playerUsername twice here
     };
 
-    try {
-        // Insert the item into the DynamoDB table
-        await dynamoDb.put({ TableName: connectionsTable, Item: item }).promise();
-        return { statusCode: 200, body: 'Connected.' };
-    } catch (err) {
-        console.error('Error saving connection:', err);
-        return { statusCode: 500, body: 'Failed to connect' };
-    }
+    await dynamoDb.put({ TableName: connectionsTableName, Item: item }).promise();
+    return { statusCode: 200, body: JSON.stringify({ message: 'Connected.' }) };
+  } catch (err) {
+    console.error('Error:', err);
+    return { statusCode: 500, body: JSON.stringify({ message: 'Failed to connect' }) };
+  }
 };
