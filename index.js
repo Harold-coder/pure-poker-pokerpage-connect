@@ -21,6 +21,6 @@ exports.handler = async (event) => {
         return { statusCode: 200, body: JSON.stringify({ message: 'Connected.', action: 'connect' }) };
     } catch (err) {
         console.error('Error:', err);
-        return { statusCode: 500, body: JSON.stringify({ message: 'Failed to connect', action: 'conect' }) };
+        return { statusCode: 500, body: JSON.stringify({ message: 'Failed to connect', action: 'connect' }) };
     }
 };
