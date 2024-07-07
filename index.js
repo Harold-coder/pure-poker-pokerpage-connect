@@ -59,6 +59,8 @@ exports.handler = async (event) => {
         ...(userId && { playerId: userId }),
     };
 
+    console.log("Item:", item);
+
     try {
         await dynamoDb.put({ TableName: connectionsTableName, Item: item }).promise();
         return { statusCode: 200, body: JSON.stringify({ message: 'Connected.', action: 'connect' }) };
