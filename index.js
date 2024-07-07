@@ -5,9 +5,14 @@ const connectionsTableName = process.env.CONNECTIONS_TABLE;
 exports.handler = async (event) => {
     const connectionId = event.requestContext.connectionId;
 
+    console.log("Hello!");
+
     // Optionally retrieve gameId and playerId from queryStringParameters
     const gameId = event.queryStringParameters ? event.queryStringParameters.gameId : null;
     const playerId = event.queryStringParameters ? event.queryStringParameters.playerId : null;
+
+    console.log("gameId", gameId);
+    console.log("playerId:", playerId);
 
     // Note: playerId = jwtToken
     if (!playerId) {
